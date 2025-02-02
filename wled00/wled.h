@@ -56,8 +56,15 @@
 #undef WLED_ENABLE_ADALIGHT // disable has priority over enable
 #endif
 // TODO: uncommented the 2 lines below to enable dmx
-#define WLED_ENABLE_DMX       // uses 3.5kb (use LEDPIN other than 2)
+// ... at the top of the file ...
+#ifndef WLED_ENABLE_DMX
+#define WLED_ENABLE_DMX // uses 3.5kb (use LEDPIN other than 2)
+#endif
+
+#ifndef WLED_ENABLE_DMX_INPUT
 #define WLED_ENABLE_DMX_INPUT // Listen for DMX over Serial
+#endif
+// ... rest of the file ...
 // #define WLED_ENABLE_JSONLIVE     // peek LED output via /json/live (WS binary peek is always enabled)
 #ifndef WLED_DISABLE_LOXONE
 #define WLED_ENABLE_LOXONE // uses 1.2kb
