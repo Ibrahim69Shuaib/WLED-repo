@@ -57,13 +57,13 @@
 #endif
 // TODO: uncommented the 2 lines below to enable dmx
 // ... at the top of the file ...
-#ifndef WLED_ENABLE_DMX
-#define WLED_ENABLE_DMX // uses 3.5kb (use LEDPIN other than 2)
-#endif
+// #ifndef WLED_ENABLE_DMX
+// #define WLED_ENABLE_DMX // uses 3.5kb (use LEDPIN other than 2)
+// #endif
 
-#ifndef WLED_ENABLE_DMX_INPUT
-#define WLED_ENABLE_DMX_INPUT // Listen for DMX over Serial
-#endif
+// #ifndef WLED_ENABLE_DMX_INPUT
+// #define WLED_ENABLE_DMX_INPUT // Listen for DMX over Serial
+// #endif
 // ... rest of the file ...
 // #define WLED_ENABLE_JSONLIVE     // peek LED output via /json/live (WS binary peek is always enabled)
 #ifndef WLED_DISABLE_LOXONE
@@ -472,12 +472,14 @@ WLED_GLOBAL SparkFunDMX dmx;
 #endif
 WLED_GLOBAL uint16_t e131ProxyUniverse _INIT(0); // output this E1.31 (sACN) / ArtNet universe via MAX485 (0 = disabled)
 #endif
-#ifdef WLED_ENABLE_DMX_INPUT
+// TODO: replaced WLED_ENABLE_DMX_INPUT with WLED_ENABLE_DMX_UDP_SYNC
+#ifdef WLED_ENABLE_DMX_UDP_SYNC
 WLED_GLOBAL int dmxInputTransmitPin _INIT(0);
 WLED_GLOBAL int dmxInputReceivePin _INIT(0);
 WLED_GLOBAL int dmxInputEnablePin _INIT(0);
 WLED_GLOBAL int dmxInputPort _INIT(2);
-WLED_GLOBAL DMXInput dmxInput;
+// WLED_GLOBAL DMXInput dmxInput;
+// TODO: commented out because it's already defined in dmx_input.h
 #endif
 
 WLED_GLOBAL uint16_t e131Universe _INIT(1);                       // settings for E1.31 (sACN) protocol (only DMX_MODE_MULTIPLE_* can span over consecutive universes)

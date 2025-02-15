@@ -1,118 +1,38 @@
 #pragma once
 
-#include <mutex>
+#include "wled.h"
 #include <WiFiUdp.h>
-#include "dmx.h"
+#include <mutex>
 
-#define DMX_PACKET_SIZE 513
+// Simple structure to hold WLED state
+struct WLEDState
+{
+  uint8_t mode;
+  uint8_t speed;
+  uint8_t intensity;
+  uint8_t r1, g1, b1; // Primary color
+  uint8_t r2, g2, b2; // Secondary color
+} __attribute__((packed));
 
 class DMXInput
 {
-private:
-  uint8_t rxPin = 255;
-  uint8_t txPin = 255;
-  uint8_t enPin = 255;
-  uint8_t inputPortNum = 255;
-  bool initialized = false;
-  std::mutex dmxDataLock;
-  uint8_t dmxdata[DMX_PACKET_SIZE];
-  WiFiUDP dmxUdp;
-  bool udpSetup = false;
-  const uint16_t DMX_UDP_PORT = 6454; // Standard Art-Net port
-
 public:
-  void init(uint8_t rx, uint8_t tx, uint8_t en, uint8_t port)
-  {
-    rxPin = rx;
-    txPin = tx;
-    enPin = en;
-    inputPortNum = port;
-    installDriver();
-  }
-
+  void init(uint8_t rxPin, uint8_t txPin, uint8_t enPin, uint8_t inputPortNum);
   void update();
   void disable();
   void enable();
-  bool isConnected() const { return initialized && DMX::IsHealthy(); }
+  bool isConnected() const { return initialized; }
 
 private:
-  bool installDriver();
-  void updateInternal();
+  WiFiUDP udp;
+  bool initialized = false;
+  WLEDState state;
+  std::mutex stateLock;
+
+  void broadcastState();
+  void checkAndUpdateConfig() {} // Not used in this implementation
 };
-// #pragma once
-// #include <cstdint>
-// #include <esp_dmx.h>
-// #include <atomic>
-// #include <mutex>
-// #include <WiFiUdp.h>
 
-// /*
-//  * Support for DMX/RDM input via serial (e.g. max485) on ESP32
-//  * ESP32 Library from:
-//  * https://github.com/someweisguy/esp_dmx
-//  */
-// class DMXInput
-// {
-// public:
-//   void init(uint8_t rxPin, uint8_t txPin, uint8_t enPin, uint8_t inputPortNum);
-//   void update();
-
-//   /**disable dmx receiver (do this before disabling the cache)*/
-//   void disable();
-//   void enable();
-
-// private:
-//   /// @return true if rdm identify is active
-//   bool isIdentifyOn() const;
-
-//   /**
-//    * Checks if the global dmx config has changed and updates the changes in rdm
-//    */
-//   void checkAndUpdateConfig();
-
-//   /// overrides everything and turns on all leds
-//   void turnOnAllLeds();
-
-//   /// installs the dmx driver
-//   /// @return false on fail
-//   bool installDriver();
-
-//   /// is called by the dmx receive task regularly to receive new dmx data
-//   void updateInternal();
-
-//   // is invoked whenver the dmx start address is changed via rdm
-//   friend void rdmAddressChangedCb(dmx_port_t dmxPort, const rdm_header_t *header,
-//                                   void *context);
-
-//   // is invoked whenever the personality is changed via rdm
-//   friend void rdmPersonalityChangedCb(dmx_port_t dmxPort, const rdm_header_t *header,
-//                                       void *context);
-
-//   /// The internal dmx task.
-//   /// This is the main loop of the dmx receiver. It never returns.
-//   friend void dmxReceiverTask(void *context);
-
-//   uint8_t inputPortNum = 255;
-//   uint8_t rxPin = 255;
-//   uint8_t txPin = 255;
-//   uint8_t enPin = 255;
-
-//   /// is written to by the dmx receive task.
-//   byte dmxdata[DMX_PACKET_SIZE];
-//   /// True once the dmx input has been initialized successfully
-//   bool initialized = false; // true once init finished successfully
-//   /// True if dmx is currently connected
-//   std::atomic<bool> connected{false};
-//   std::atomic<bool> identify{false};
-//   /// Timestamp of the last time a dmx frame was received
-//   unsigned long lastUpdate = 0;
-
-//   /// Taskhandle of the dmx task that is running in the background
-//   TaskHandle_t task;
-//   /// Guards access to dmxData
-//   std::mutex dmxDataLock;
-//   // TODO: code below is newly added
-//   WiFiUDP dmxUdp;
-//   bool udpSetup = false;
-//   const uint16_t DMX_UDP_PORT = 6454; // Standard Art-Net port
-// };
+#ifdef WLED_ENABLE_DMX_UDP_SYNC
+extern DMXInput dmxInput; // Only declare if DMX UDP sync is enabled
+#endif
